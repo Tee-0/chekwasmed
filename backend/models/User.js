@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bycryptjs');
+const bcrypt = require('bcryptjs');
 
 //User Definition
 const userSchema = new mongoose.Schema ({
@@ -82,7 +82,7 @@ userSchema.pre('save', async function(next) {
 
     try{
         //hashing the password with bycrypt
-        this.password = await bycrypt.hash(this.password, 12);
+        this.password = await bcrypt.hash(this.password, 12);
         next();
     } catch(error) {
         next(error);
@@ -95,7 +95,7 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.comparePassword = async function(candidatePassword){
      try{
         //bycrypt compares the plain text password with the hashed version
-        return await bycrypt.comapre(candidatePassword, this.password);
+        return await bcrypt.comapre(candidatePassword, this.password);
      } catch (error){
         throw new error('password comparison failed');
      }
