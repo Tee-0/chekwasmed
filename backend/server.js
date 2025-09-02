@@ -17,6 +17,13 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use(cors()); // Alllows frontend to communicate with backend
 app.use(express.json()); //Allows server to read JSON data
 
+//Import route files
+const authRoutes = require('./routes/auth');
+
+//Using the routes
+app.use('/api/auth', authRoutes); //all auth routes will start with /api/auth for orgsnized routing, scalability
+//and to avoid conflicts
+
 //Routes
 app.get('/', (req, res)  => {
     res.json ({
