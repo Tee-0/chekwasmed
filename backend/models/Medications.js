@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+//Medications that exist in the database
 //Schema/blueprint for individual medications/drugs
 const medicationSchema = new mongoose.schema({
     //Basic drug identification
