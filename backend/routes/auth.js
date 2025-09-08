@@ -1,25 +1,27 @@
 const express = require('express');
-const User= require('../models/User');
-const jwt= require('jsonwebtoken');
-const router= express.Router();
+const User = require('../models/User');
+const jwt = require('jsonwebtoken');
+const router = express.Router();
 
 //ROUTE: Register new user
 
-router.post('/register', async(req, res) => {
-    try{
-        const{name, email,password, dateOfBirth} = req.body;
+router.post('/register', async (req, res) => {
+    try {
+        console.log("Received registration request:", req.body);
+
+        const { name, email, password, dateOfBirth } = req.body;
 
         //checking if user already exists
-        const existingUser = await User.findOne({ email});
-        if(existingUser) {
-            return res.status(400).json ({
-                success:false,
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
                 message: 'User with this email already exists'
             });
         }
 
         //Create New User
-        const user = new User ({
+        const user = new User({
             name, email, password, dateOfBirth: new Date(dateOfBirth)
         });
 
@@ -35,15 +37,74 @@ router.post('/register', async(req, res) => {
             token,
             user: {
                 id: user._id,
-                name:user.name,
-                email:user.email,
-                age:user.age,
+                name: user.name,
+                email: user.email,
+                age: user.age,
                 role: user.role
             }
         });
-    } catch(error){
+    } catch (error) {
         console.error('Login error:', error);
-        res.status(500).json ({
+        res.status(500).json({
+            success: false,
+            message: 'Server error during login'
+        });
+    }
+});
+// ROUTE: Login existing user
+// POST /api/auth/login
+router.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Find user and include password field it is normally excluded
+        // Why use +password? It is cuz our schema has 'select: false' on password
+        const user = await User.findOne({ email }).select('+password');
+
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid email or password'
+            });
+        }
+
+        // Check if account is active
+        if (!user.isActive) {
+            return res.status(401).json({
+                success: false,
+                message: 'Account has been deactivated'
+            });
+        }
+
+        // Compare provided password with stored hash
+        const isPasswordCorrect = await user.comparePassword(password);
+
+        if (!isPasswordCorrect) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid email or password'
+            });
+        }
+
+        // Generate new token for this login session
+        const token = user.generateAuthToken();
+
+        res.json({
+            success: true,
+            message: 'Login successful',
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                age: user.age,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.status(500).json({
             success: false,
             message: 'Server error during login'
         });
@@ -51,28 +112,30 @@ router.post('/register', async(req, res) => {
 });
 
 //ROUTE: get current user profile, it requires authentication, user must provide valid token
-router.get('/me', async(req,res) => {
-    try{
+router.get('/me', async (req, res) => {
+    try {
         //extract token from Authorization header
-        const token = req.header('Authorization')?.replace('Bearer', '');
+        const token = req.header('Authorization')?.replace('Bearer', '').trim();
+        console.log('Extracted token:', token);
 
-        if(!token) {
-            return res.status(401).json ({
-               success: false,
-               message: 'No token provided' 
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'No token provided'
             });
         }
 
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
-    
+
         // Find user (exclude password)
         const user = await User.findById(decoded.userId);
-    
+
         if (!user || !user.isActive) {
             return res.status(401).json({
-            success: false,
-             message: 'Invalid token or user not found'
+                success: false,
+                message: 'Invalid token or user not found'
             });
         }
 
@@ -88,25 +151,25 @@ router.get('/me', async(req,res) => {
                 medicalConditions: user.medicalConditions
             }
         });
-    } catch(error) {
+    } catch (error) {
         console.error('Token verification error:', error);
         res.status(401).json({
-             success: false,
-             message: 'Invalid token'
-    });
+            success: false,
+            message: 'Invalid token'
+        });
 
     }
 });
 
 //Route to update user profile
-router.put('/profile', async(req, res) => {
-    try{
+router.put('/profile', async (req, res) => {
+    try {
         const token = req.header('Authorization')?.replace('Bearer', '');
 
-        if(!token){
+        if (!token) {
             return res.status(401).json({
-                success:false,
-                message:'No token provided'
+                success: false,
+                message: 'No token provided'
             });
         }
 
@@ -114,18 +177,18 @@ router.put('/profile', async(req, res) => {
         const userId = decoded.userId;
 
         //gets fields that can be updated
-        const{name,allergies,medicalConditions} = req.body;
+        const { name, allergies, medicalConditions } = req.body;
 
         //Update user, not allowing email or password changes for security
         const user = await User.findByIdAndUpdate(   //await: to wait for database to respond as it takes time sometimes
             userId,
             {
-                name,allergies,medicalConditions, updatedAt: Date.now()
+                name, allergies, medicalConditions, updatedAt: Date.now()
             },
-            {new: true, runValidators: true} //Returns Updates document because mongoose returns old documents by default and also run schema validations
+            { new: true, runValidators: true } //Returns Updates document because mongoose returns old documents by default and also run schema validations
         );
 
-        if(!user) {
+        if (!user) {
             return res.status(401).json({
                 success: false,
                 message: 'User not found'
@@ -144,9 +207,9 @@ router.put('/profile', async(req, res) => {
                 medicalConditions: user.medicalConditions
             }
         });
-    } catch(error) {
+    } catch (error) {
         console.error('Profile update error:', error);
-        res.status(500).json ({
+        res.status(500).json({
             success: false,
             message: 'Server error during profile update'
         });

@@ -97,7 +97,7 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.comparePassword = async function (candidatePassword) {
     try {
         //bycrypt compares the plain text password with the hashed version
-        return await bcrypt.comapre(candidatePassword, this.password);
+        return await bcrypt.compare(candidatePassword, this.password);
     } catch (error) {
         throw new error('password comparison failed');
     }
@@ -107,11 +107,13 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.methods.generateAuthToken = function () {
     const jwt = require('jsonwebtoken');
 
+
+    console.log("Generating auth token for user:", this.email);
     //create token with user ID and role
 
-    return jwt, sign(
+    return jwt.sign(
         {
-            userID: this._id,
+            userId: this._id,
             email: this.email,
             role: this.role
         },
