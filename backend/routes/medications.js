@@ -4,7 +4,7 @@
 //This is basically forming the foundation for conflict checking
 
 const express = require('express');
-const Medication = require('../models/Medication');
+const Medication = require('../models/Medications');
 const UserMedication = require('../models/UserMedication');
 const { authenticate, validateRequest } = require('../middleware/auth');
 const router = express.Router();
@@ -98,6 +98,8 @@ router.post('/user-medications',
                 })
             }
         });
+
+        module.exports = router;
     
 
 

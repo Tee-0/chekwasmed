@@ -57,6 +57,6 @@ app.post('/api/check-conflicts', (req, res) => {
 
 //Starting the server
 app.listen(PORT, () =>  {
-   console.log('Chekwasmed server is running on port ${PORT}');
-   console.log('Visit: http://localhost:${PORT}');
+   console.log(`Chekwasmed server is running on port ${PORT}`);
+   console.log(`Visit: http://localhost:${PORT}`);
 });

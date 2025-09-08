@@ -13,7 +13,7 @@ const userMedicationSchema = new mongoose.Schema({
 
     //Link to the actual medication from our drug database
     medicationId: {
-        type: mongoose.Schema.Types.ObjectsId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Medication',
         required: true
     },

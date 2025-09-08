@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 //Medications that exist in the database
 //Schema/blueprint for individual medications/drugs
-const medicationSchema = new mongoose.schema({
+const medicationSchema = new mongoose.Schema({
     //Basic drug identification
     genericName: {
         type: String,
