@@ -19,10 +19,12 @@ app.use(express.json()); //Allows server to read JSON data
 
 //Import route files
 const authRoutes = require('./routes/auth');
+const medicationRoutes = require('./routes/medications');
 
 //Using the routes
 app.use('/api/auth', authRoutes); //all auth routes will start with /api/auth for orgsnized routing, scalability
 //and to avoid conflicts
+app.use('/api/medications', medicationRoutes);
 
 //Routes
 app.get('/', (req, res)  => {
@@ -45,7 +47,7 @@ app.get('/api/test', (req, res) => {
 app.post('/api/check-conflicts', (req, res) => {
     const{medications} = req.body;
 
-    //return medications received
+    //return medications received for now
     res.json ({
         message: 'Conflict check endpoint working',
         medications_received: medications || [],
