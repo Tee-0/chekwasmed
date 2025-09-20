@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */ 
 module.exports = {
   content: [
-    "./src/**/*.{jsjsx,ts,tsx}", //tells tailwind to look in src folder & scan all react files
+    "./src/**/*.{js,jsx,ts,tsx}", //tells tailwind to look in src folder & scan all react files
   ],
   theme: {
     extend: { // keep tailwinds default design system, just add to them

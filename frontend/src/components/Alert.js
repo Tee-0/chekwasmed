@@ -2,7 +2,7 @@ import React from 'react';
 import {
     CheckCircleIcon,
     ExclamationTriangleIcon,
-    XCirlceIcon,
+    XCircleIcon,
     InformationCircleIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -55,7 +55,7 @@ const Alert = ({
         <div
             className={`
             rounded-lg border p-4
-            ${config.bgcolour}
+            ${config.bgColour}
             ${config.borderColor}
             ${className}
             `}
@@ -145,7 +145,7 @@ export const WarningAlert = ({ title = "Warning", message, onClose, className = 
 };
 
 //Drug conflict alert with severity-based styling
-export const CpnflictAlert = ({ conflict, onClose }) => {
+export const ConflictAlert = ({ conflict, onClose }) => {
     const getSeverityConfig = (severity) => {
         switch (severity) {
             case 'major':

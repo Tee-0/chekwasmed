@@ -28,10 +28,10 @@ const userSchema = new mongoose.Schema({
     },
 
     //healthcare specific fields
-    dateOfBirth: {
-        type: Date,
-        required: [true, 'Date of birth is required for drug interaction calculations']
-    },
+    //dateOfBirth: {
+        //type: Date,
+        //required: [true, 'Date of birth is required for drug interaction calculations']
+    //},
 
     // get age() {
     //    if (!this.dateOfBirth) return null; // handle missing date
@@ -99,7 +99,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
         //bycrypt compares the plain text password with the hashed version
         return await bcrypt.compare(candidatePassword, this.password);
     } catch (error) {
-        throw new error('password comparison failed');
+        throw new Error('password comparison failed');
     }
 };
 

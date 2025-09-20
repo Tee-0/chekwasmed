@@ -9,7 +9,7 @@ router.post('/register', async (req, res) => {
     try {
         console.log("Received registration request:", req.body);
 
-        const { name, email, password, dateOfBirth } = req.body;
+        const { name, email, password } = req.body;
 
         //checking if user already exists
         const existingUser = await User.findOne({ email });
@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
 
         //Create New User
         const user = new User({
-            name, email, password, dateOfBirth: new Date(dateOfBirth)
+            name, email, password //dateOfBirth: new Date(dateOfBirth)
         });
 
         await user.save();
@@ -55,13 +55,21 @@ router.post('/register', async (req, res) => {
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
     try {
+        console.log('=== LOGIN ROUTE HIT ==='); // debug log
+        console.log('Request body:', req.body); //debug log
+
         const { email, password } = req.body;
+
+        console.log('Extracted email:', email); //debug log
+        console.log('Extracted password:', password ? '***provided***' : 'missing'); //debug log
 
         // Find user and include password field it is normally excluded
         // Why use +password? It is cuz our schema has 'select: false' on password
         const user = await User.findOne({ email }).select('+password');
+        console.log('User found:', user ? 'YES' : 'NO'); //debug log
 
         if (!user) {
+            console.log('No user found with email:', email); //debug log
             return res.status(401).json({
                 success: false,
                 message: 'Invalid email or password'
@@ -70,6 +78,7 @@ router.post('/login', async (req, res) => {
 
         // Check if account is active
         if (!user.isActive) {
+            console.log('User account is inactive'); //debug log
             return res.status(401).json({
                 success: false,
                 message: 'Account has been deactivated'
@@ -77,9 +86,12 @@ router.post('/login', async (req, res) => {
         }
 
         // Compare provided password with stored hash
+        console.log('Comparing passwords...'); //deb log
         const isPasswordCorrect = await user.comparePassword(password);
+        console.log('Password correct:', isPasswordCorrect);// debug log
 
         if (!isPasswordCorrect) {
+            console.log('Password comparison failed'); //debug log
             return res.status(401).json({
                 success: false,
                 message: 'Invalid email or password'
@@ -87,7 +99,9 @@ router.post('/login', async (req, res) => {
         }
 
         // Generate new token for this login session
+        console.log('Generating token...'); //debug log
         const token = user.generateAuthToken();
+        console.log('Login successful for user:', user.email); //debug log
 
         res.json({
             success: true,
@@ -173,7 +187,7 @@ router.put('/profile', async (req, res) => {
             });
         }
 
-        const decoded = jwt.verify(tokem, process.env.JWT_SECRET || 'fallback-secret-key');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret-key');
         const userId = decoded.userId;
 
         //gets fields that can be updated

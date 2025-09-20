@@ -19,6 +19,9 @@ export const AuthProvider = ({ children }) => {
 
     const API_BASE_URL = 'http://localhost:5000/api';
 
+    //Configure axios base URL
+    useEffect(() => { axios.defaults.baseURL = API_BASE_URL; }, []);
+
     useEffect(() => {
         //Sets default base URL for all axios requests
         if (token) {
@@ -28,53 +31,67 @@ export const AuthProvider = ({ children }) => {
         }
     }, [token]);
 
+
     //Check if user is already logged in when app starts
     useEffect(() => {
         const checkAuthStatus = async () => {
             try {
-                // Get token from localStorage, it usually persists between browser sessions
                 const storedToken = localStorage.getItem('chekwasmed_token');
                 const storedUser = localStorage.getItem('chekwasmed_user');
 
                 if (storedToken && storedUser) {
-                    // Verify the token is still valid by calling backend
-                    const response = await axios.get('/auth/me', {
-                        headers: { Authorization: `Bearer ${storedToken}` }
-                    });
+                    setToken(storedToken);
+                    setUser(JSON.parse(storedUser));  // Parse the stored user
+                    setIsAuthenticated(true);
 
-                    if (response.data.success) {
-                        // Token is valid - restore user session
-                        setToken(storedToken);
-                        setUser(response.data.user);
-                        setIsAuthenticated(true);
-                    } else {
-                        // Token is invalid - clear storage
+                    // Optional: Verify token is still valid (but don't loop if it fails)
+                    try {
+                        const response = await axios.get('/auth/me', {
+                            headers: { Authorization: `Bearer ${storedToken}` }
+                        });
+
+                        if (!response.data.success) {
+                            throw new Error('Token invalid');
+                        }
+                    } catch (verifyError) {
+                        // If verification fails, clear everything but don't loop
+                        console.log('Token verification failed, clearing auth');
                         localStorage.removeItem('chekwasmed_token');
                         localStorage.removeItem('chekwasmed_user');
+                        setToken(null);
+                        setUser(null);
+                        setIsAuthenticated(false);
                     }
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
-                // Clear invalid tokens
+                // Clear everything on error
                 localStorage.removeItem('chekwasmed_token');
                 localStorage.removeItem('chekwasmed_user');
+                setToken(null);
+                setUser(null);
+                setIsAuthenticated(false);
             } finally {
-                setLoading(false); // Done checking
+                setLoading(false);  // Always set loading to false
             }
         };
 
         checkAuthStatus();
-    }, []);
+    }, []); // Empty dependency array - only run once on mount
 
     //login function
     const login = async (email, password) => {
         try {
             setLoading(true);
 
+            console.log('Making login request to:', `${API_BASE_URL}/auth/login`); // Debug log
+
             const response = await axios.post('/auth/login', {
                 email,
                 password
             });
+
+            console.log('Login API response:', response.data); // Debug log
 
             if (response.data.success) {
                 const { token: newToken, user: newUser } = response.data;
@@ -88,12 +105,16 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('chekwasmed_token', newToken);
                 localStorage.setItem('chekwasmed_user', JSON.stringify(newUser));
 
+                console.log('Login successful, returning success response'); // Debug log
+
                 return { success: true, user: newUser };
             } else {
+                console.log('Login failed:', response.data.message); // Debug log
                 return { success: false, message: response.data.message };
             }
         } catch (error) {
             console.error('Login error:', error);
+            console.log('Error details:', error.response?.data); // Debug log
 
             // Extract error message from response
             const message = error.response?.data?.message || 'Login failed. Please try again.';
@@ -196,9 +217,9 @@ export const AuthProvider = ({ children }) => {
         userEmail: user?.email,
     };
 
-    return(
-      <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>  
+    return (
+        <AuthContext.Provider value={contextValue}>
+            {children}
+        </AuthContext.Provider>
     );
 };
