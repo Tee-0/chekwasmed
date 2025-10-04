@@ -5,10 +5,38 @@ const medicationSchema = new mongoose.Schema({
     //Basic drug identification
     genericName: {
         type: String,
-        required: [true, 'Generic name is required'],
+        required: [true, 'name is required'],
         unique: true,
         trim: true,
         lowercase: true
+    },
+
+    category: {
+        type: String,
+        trim: true,
+        enum: [
+            'Pain Relief',
+            'Antibiotics',
+            'Antiviral',
+            'Cardiovascular',
+            'Diabetes',
+            'Mental Health',
+            'Allergy',
+            'Respiratory',
+            'Digestive',
+            'Skin Care',
+            'Vitamins & Supplements',
+            'Other'
+        ]
+    },
+
+    description: {
+        type: String,
+        trim: true
+    },
+    dosage: {
+        type: String,
+        trim: true
     },
 
     brandNames: [{
@@ -33,10 +61,11 @@ const medicationSchema = new mongoose.Schema({
         required: true,
         enum: [
             'analgesic', 'antibiotic', 'antidepressant', 'antihistamine',
-            'antihypertensive', 'anticoagulant', 'diabetes_medication',
+            'antihypertensive', 'nsaid', 'biguanide', 'anticoagulant', 'diabetes_medication',
             'heart_medication', 'psychiatric_medication', 'hormone',
             'vitamin', 'supplement', 'other'
-        ]
+        ],
+        lowercase: true
     },
 
     subClass: String, //More specific classification
@@ -60,25 +89,6 @@ const medicationSchema = new mongoose.Schema({
         indication: String // what condition this dosage treats
     }],
 
-    // Safety information
-    contraindications: [String], // When not to use this drug
-    sideEffects: [{
-        effect: String,
-        frequency: {
-            type: String,
-            enum: ['common', 'uncommon', 'rare', 'very_rare']
-        }
-    }],
-
-    // Special populations
-    pregnancyCategory: {
-        type: String,
-        enum: ['A', 'B', 'C', 'D', 'X', 'unknown']
-    },
-
-
-    pediatricUse: Boolean,
-    geriatricConsiderations: String,
 
     // Drug interaction data
     majorInteractions: [{
@@ -160,7 +170,7 @@ medicationSchema.pre('save', function (next) {
 medicationSchema.statics.searchByName = async function (searchTerm) {
     const regex = new RegExp(searchTerm, 'i'); //creates a regular expression from the search item, it is not case sensitive
 
-    return await this.fing({
+    return await this.find({
         $or: [
             { genericName: regex },
             { brandNames: { $in: [regex] } },
@@ -181,4 +191,4 @@ medicationSchema.methods.getAllInteractions = function () {
     };
 };
 
-module.exports= mongoose.model('Medication', medicationSchema);
+module.exports = mongoose.model('Medication', medicationSchema);

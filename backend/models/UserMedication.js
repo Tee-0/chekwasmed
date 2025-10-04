@@ -20,29 +20,13 @@ const userMedicationSchema = new mongoose.Schema({
 
     //Medication Details 
     dosage: {
-        amount: {
-            type: Number,
-            required: [true, 'Dosage amount is required']
-        },
-        unit: {
-            type: String,
-            required: [true, 'Dosage unit is required'],
-            enum: ['mg', 'g', 'ml', 'tablets', 'capsules', 'units', 'drops']
-        }
+        type: String,
+        required: [true, 'Dosage is required']
     },
 
     frequency: {
-        timesPerDay: {
-            type: Number,
-            required: true,
-            min: [1, 'Medication must be taken once a day'],
-            max: [24, 'Cannot exceed 24 times per day']
-        },
-        schedule: [String], // time and how often(e.g twice daily)
-        asNeeded: {
-            type: Boolean,
-            default: false
-        }
+        type: String,
+        required: [true, 'Frequency is required']
     },
 
     //Medical Context for drugs
@@ -55,7 +39,7 @@ const userMedicationSchema = new mongoose.Schema({
     //reason for taking drug
     indication: {
         type: String,
-        required: [true, 'Medical reason for taking this medication is required']
+        required: [false]
     },
 
     //Tracking the timeline of the drug
@@ -153,3 +137,5 @@ userMedicationSchema.virtual('durationDays').get(function () {
     const diffTime = Math.abs(endDate - this.startDate); // diff between end date and start date
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)); //conv from milliseconds to days
 });
+
+module.exports = mongoose.model('UserMedication', userMedicationSchema);

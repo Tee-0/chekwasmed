@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
+const userMedicationRoutes = require('./routes/userMedications');
+
 
 //Express app
 const app = express();
@@ -25,6 +27,7 @@ const medicationRoutes = require('./routes/medications');
 app.use('/api/auth', authRoutes); //all auth routes will start with /api/auth for orgsnized routing, scalability
 //and to avoid conflicts
 app.use('/api/medications', medicationRoutes);
+app.use('/api/user-medications', userMedicationRoutes);
 
 //Routes
 app.get('/', (req, res)  => {

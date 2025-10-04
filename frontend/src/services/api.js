@@ -106,10 +106,11 @@ export const medicationAPI = {
             return response.data;
         },
 
-        add: async (medicationId, dosage) => {
+        add: async (medicationId, dosage, frequency) => {
             const response = await api.post('/user-medications', {
                 medicationId,
-                dosage
+                dosage,
+                frequency
             });
             return response.data;
         },
