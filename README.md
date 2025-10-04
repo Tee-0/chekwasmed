@@ -1,6 +1,6 @@
 #ChekwasMed - AI-powered Medication Conflict Checker
 
-A healthcare Saas Application that helps users identify dagerous medication Interactons Using AI
+A healthcare Saas Application that helps users identify dangerous medication Interactons Using AI
 
 ## Project Structure
 - 'backend' - Node.js API server
