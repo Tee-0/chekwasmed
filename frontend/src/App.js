@@ -14,6 +14,8 @@ import MedicationList from './pages/MedicationList';
 import AddMedication from './pages/AddMedication';
 import EditMedication from './pages/EditMedication';
 import Profile from './pages/Profile';
+import InteractionChecker from './pages/InteractionChecker';
+
 
 import logo from './logo.svg';
 import './App.css';
@@ -145,6 +147,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="/interactions"
+              element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <InteractionChecker/>
+                  </AppLayout>
+                </ProtectedRoute>
+              }
+             />
 
             {/* Default redirects */}
             <Route path="/" element={<Navigate to="/dashboard" />} />

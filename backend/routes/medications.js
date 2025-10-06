@@ -50,7 +50,7 @@ router.get('/search', async (req, res) => {
 });
 
 
-router.post('/medications', authenticate, async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
     try {
         console.log('Add medication to database:', req.body);
 
@@ -72,7 +72,7 @@ router.post('/medications', authenticate, async (req, res) => {
 });
 
 // GET - Get all medications from master database
-router.get('/medications', authenticate, async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
     try {
         const medications = await Medication.find({ isActive: true });
 
